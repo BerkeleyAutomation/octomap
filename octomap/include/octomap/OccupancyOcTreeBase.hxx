@@ -718,7 +718,7 @@ namespace octomap {
       if ((step[dim] < 0 && current_key[dim] == 0)
     		  || (step[dim] > 0 && current_key[dim] == 2* this->tree_max_val-1))
       {
-        OCTOMAP_WARNING("Coordinate hit bounds in dim %d, aborting raycast\n", dim);
+//        OCTOMAP_WARNING("Coordinate hit bounds in dim %d, aborting raycast\n", dim);
         // return border point nevertheless:
         end = this->keyToCoord(current_key);
         return false;
@@ -756,6 +756,26 @@ namespace octomap {
     } // end while
 
     return true;
+  }
+
+  template <class NODE>
+  void OccupancyOcTreeBase<NODE>::castRays(int num_rays, double *origins, double *directionsP, double *ends, uint8_t *hits,
+                                          bool ignoreUnknown, double maxRange) const {
+#ifdef _OPENMP
+    omp_set_num_threads(20);
+    #pragma omp parallel for
+#endif
+    for (int i = 0; i < num_rays; i++) {
+      point3d origin(origins[i*3], origins[i*3+1], origins[i*3+2]);
+      point3d direction(directionsP[i*3], directionsP[i*3+1], directionsP[i*3+2]);
+      point3d end(0, 0, 0);
+
+      hits[i] = castRay(origin, direction, end, ignoreUnknown, maxRange);
+
+      ends[i*3] = end.x();
+      ends[i*3+1] = end.y();
+      ends[i*3+2] = end.z();
+    }
   }
 
   template <class NODE>

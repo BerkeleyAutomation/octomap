@@ -302,6 +302,9 @@ namespace octomap {
     virtual bool castRay(const point3d& origin, const point3d& direction, point3d& end,
                  bool ignoreUnknownCells=false, double maxRange=-1.0) const;
 
+    virtual void castRays(int num_rays, double *origins, double *directionsP, double *ends, uint8_t *hits,
+                 bool ignoreUnknownCells=false, double maxRange=-1.0) const;
+
     /**
      * Retrieves the entry point of a ray into a voxel. This is the closest intersection point of the ray
      * originating from origin and a plane of the axis aligned cube.
